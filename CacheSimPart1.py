@@ -74,6 +74,38 @@ bSize = args.BlockSize
 aSoc = args.Associativity
 ZEROES = '00000000'
 
+class CacheBlock:
+    def __init__self(self, size):
+        self.num_entries = 0
+        self.maxSize = size
+        self.entries = {}
+
+    def get_val(self, addr):
+        return self.entries[addr]
+
+    def set_val(self, addr, val):
+        if self.num_entries < self.maxSize:
+            self.entries[addr] = val
+            self.num_entries = self.num_entries + 1
+        else:
+            print("Block is full!")
+
+    def replace(self, addr, value):
+        if self.entries.has_key(addr):
+            self.entries[addr] = val
+
+
+
+
+class Cache:
+    def __init__(self, associativity, size, blockSize, rep_policy):
+        self.associativity = associativity
+        self.size = size
+        self.blockSize = blockSize
+        self.blocks = [CacheBlock(self.blockSize) for x in range(self.associativity)]
+        self.rep_policy = rep_policy
+
+
 def calculate_cache_values():
 
     blocks = cSizeBytes / bSize
@@ -131,7 +163,8 @@ def step(tr, instr_idx, data_idx):
 def simulate():
     print("\n\n\n***** Beginning Simulation ******")
     trace = read_trace(args.FileTrace)
-    step(trace, 0, 1)
+    for i in range(0,len(trace),3):
+        step(trace, i, i+1)
 
 
 
