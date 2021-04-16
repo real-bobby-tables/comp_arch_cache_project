@@ -98,17 +98,22 @@ def calculate_cache_values():
 
 def parse_instruction_line(line):
     instr_arr = line.split()
-    print(instr_arr)
+    instr_len = instr_arr[1]
+    instr_len_num = instr_len[1:3]
+    instr_addr = instr_arr[2]
+    print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
+    #print(instr_arr)
     return None
 
 def parse_data_line(line):
     data_arr = line.split()
-    src_tup = (data_arr[0], data_arr[1], data_arr[2])
-    dst_tup = (data_arr[3], data_arr[4], data_arr[5])
-    if (src_tup[1] == ZEROES or dst_tup[1] == ZEROES):
-        print("Found zeroes, skipping")
+    src_tup = (data_arr[1], data_arr[2])
+    dst_tup = (data_arr[4], data_arr[5])
+    if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
+        print("No reads/writes occured")
         return None
-    print(f'Got src with addr: {src_tup[1]}{src_tup[2]}, Dest with addr: {dst_tup[1]}{dst_tup[2]}')
+    print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4')
+    print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
     return None
 
 def read_trace(tr):
@@ -116,7 +121,6 @@ def read_trace(tr):
     with open(tr, "r") as f:
         for line in f:
             trace.append(line.strip())
-    #print(trace)
     return trace
 
 def step(tr, instr_idx, data_idx):
