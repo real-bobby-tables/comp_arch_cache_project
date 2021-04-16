@@ -105,7 +105,7 @@ def parse_data_line(line):
     data_arr = line.split()
     src_tup = (data_arr[0], data_arr[1], data_arr[2])
     dst_tup = (data_arr[3], data_arr[4], data_arr[5])
-    if (src_tup[0] is ZEROES or dst_tup[0] is ZEROES):
+    if (src_tup[1] == ZEROES or dst_tup[1] == ZEROES):
         print("Found zeroes, skipping")
         return None
     print(f'Got src with addr: {src_tup[1]}{src_tup[2]}, Dest with addr: {dst_tup[1]}{dst_tup[2]}')
