@@ -106,6 +106,8 @@ class Cache:
         self.rep_policy = rep_policy
 
 
+
+
 def calculate_cache_values():
 
     blocks = cSizeBytes / bSize
