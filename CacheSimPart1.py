@@ -73,6 +73,7 @@ cSizeBytes = pow(2, (math.log(cSize, 2)+10))
 bSize = args.BlockSize
 aSoc = args.Associativity
 ZEROES = '00000000'
+cache = Cache(aSoc,cSize,bSize,repDict[args.Replacement]) #global cache build
 
 class CacheBlock:
     def __init__self(self, size):
@@ -105,7 +106,14 @@ class Cache:
         self.blocks = [CacheBlock(self.blockSize) for x in range(self.associativity)]
         self.rep_policy = rep_policy
 
-
+def createCache(self):
+    rows, cols = ((self.size/(self.blocks*self.associativity)), 3 * self.associativity) # row = size/(block*assoc)  col = valid tag data
+    arr = [[0 for i in range(cols)] for j in range(rows)]
+    for i in range(cols):
+       for j in range(rows):
+           if i%3 == 0:
+               arr[i][j] = 0 #set valid bits to 0 for cache read
+    return arr
 
 
 def calculate_cache_values():
@@ -119,6 +127,7 @@ def calculate_cache_values():
     impSize = (cSizeBytes + overhead) / 1024
     impSizeRU = math.ceil((cSizeBytes + overhead) / 1024)
     cost = round(impSizeRU * 0.09, 2)
+    
 
     print("\n***** Cache Calculated Values *****\n")
 
@@ -173,6 +182,7 @@ def simulate():
 
 
 if __name__ == '__main__':
+    
     calculate_cache_values()
     simulate()
 
