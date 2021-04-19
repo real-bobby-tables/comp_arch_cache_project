@@ -105,15 +105,16 @@ class Cache:
         self.blockSize = blockSize
         self.blocks = [CacheBlock(self.blockSize) for x in range(self.associativity)]
         self.rep_policy = rep_policy
+        self.cache_table
 
-def createCache(self):
+def create_cache(self):
     rows, cols = ((self.size/(self.blocks*self.associativity)), 3 * self.associativity) # row = size/(block*assoc)  col = valid tag data
-    arr = [[0 for i in range(cols)] for j in range(rows)]
+    self.cache_table = [[0 for i in range(cols)] for j in range(rows)]
     for i in range(cols):
        for j in range(rows):
            if i%3 == 0:
-               arr[i][j] = 0 #set valid bits to 0 for cache read
-    return arr
+                self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
+    
 
 
 def calculate_cache_values():
@@ -173,6 +174,7 @@ def step(tr, instr_idx, data_idx):
 
 def simulate():
     print("\n\n\n***** Beginning Simulation ******")
+    cache.create_cache()
     trace = read_trace(args.FileTrace)
     for i in range(0,len(trace),3):
         step(trace, i, i+1)
