@@ -68,12 +68,9 @@ print("Block Size:\t\t\t\t\t",args.BlockSize,"bytes")
 print("Associativity Size:\t\t\t",args.Associativity)
 print("Replacement Policy:\t\t\t",repDict[args.Replacement])
 
-cSize = args.CacheSize
-cSizeBytes = pow(2, (math.log(cSize, 2)+10))
-bSize = args.BlockSize
-aSoc = args.Associativity
-ZEROES = '00000000'
- #global cache build TODO:here?
+
+
+
 
 class CacheBlock:
     def __init__self(self, size):
@@ -143,24 +140,41 @@ def calculate_cache_values():
     print("Implementation Memory Size:\t",impSize,"KB","(",totalBytes,"bytes",")")
     print("Cost:\t\t\t\t\t\t $"+str(cost))
 
-def parse_instruction_line(line):
+def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
     instr_arr = line.split()
     instr_len = instr_arr[1]
     instr_len_num = instr_len[1:3]
     instr_addr = instr_arr[2]
+
+    offset = int(math.log(bSize,2))
+    offset = math.ceil(offset/4)
+
+    index =  int(math.log(cSizeBytes / (bSize * aSoc), 2))
+    index =  math.ceil(math.log(cSizeBytes / (bSize * aSoc), 2)/4)
+   
+    offset_char = instr_addr[-offset:]
+    index_char = instr_addr[-(index+offset):-offset]
+    tag_char = instr_addr[0:-(index+offset)]
+
+    print(" " ,tag)
     print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
-    #print(instr_arr)
+    print("offset ", offset_char)
+    print("index ", index_char)
+    print("tag ", tag_char)
     return None
 
 def parse_data_line(line):
     data_arr = line.split()
     src_tup = (data_arr[1], data_arr[2])
     dst_tup = (data_arr[4], data_arr[5])
+
+    
+
     if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
         print("No reads/writes occured")
         return None
-    print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') #TODO: i think this is where the cache studd will happen. Maybe pass a function
-    print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
+    #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') #TODO: i think this is where the cache studd will happen. Maybe pass a function
+    #print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
     return None
 
 def read_trace(tr):
@@ -171,23 +185,35 @@ def read_trace(tr):
     return trace
 
 def step(tr, instr_idx, data_idx):
+    
     parse_instruction_line(tr[instr_idx])
     parse_data_line(tr[data_idx])
 
 
 def simulate():
-    print("\n\n\n***** Beginning Simulation ******")
-    #print(" ",aSoc,cSizeB,bSize,repDict[args.Replacement])
-    cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) #TODO, update to the trace or step to take in cache as an argument
-    cache.create_cache()
+    print("\n\n\n***** Beginning Simulation ******")  
+    
     
     trace = read_trace(args.FileTrace)
     for i in range(0,len(trace),3):
         step(trace, i, i+1)
 
-
-
-
+#global values
+cSize = args.CacheSize
+cSizeBytes = pow(2, (math.log(cSize, 2)+10))
+bSize = args.BlockSize
+aSoc = args.Associativity
+ZEROES = '00000000'
+#global cpi calculates
+total = 0
+hits = 0
+miss = 0
+conflict = 0
+compuls =0
+blocks = cSizeBytes / bSize
+#Cache declorations
+cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) #TODO, update to the trace or step to take in cache as an argument
+cache.create_cache()
 
 if __name__ == '__main__':
     
