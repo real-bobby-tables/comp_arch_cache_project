@@ -134,9 +134,10 @@ def update_block(Replacement,index,val_bit,tag):
             miss = miss + 1
         elif(Replacement != 'Least Recently Used'):
             print("random")
-            random_bit = random.randint(0,aSoc)*3
+            random_bit = random.randint(0,aSoc-1)*3 
+                    
             cache.cache_table[index][random_bit + 1] = tag
-            cache.cache_table[index][random_bit + 2] = CLK
+            cache.cache_table[index][random_bit + 2] = CLK 
             miss = miss + 1
             
 
