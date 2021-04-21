@@ -69,32 +69,6 @@ print("Associativity Size:\t\t\t",args.Associativity)
 print("Replacement Policy:\t\t\t",repDict[args.Replacement])
 
 
-
-
-
-class CacheBlock:
-    def __init__self(self, size):
-        self.num_entries = 0
-        self.maxSize = size
-        self.entries = {}
-
-    def get_val(self, addr):
-        return self.entries[addr]
-
-    def set_val(self, addr, val):
-        if self.num_entries < self.maxSize:
-            self.entries[addr] = val
-            self.num_entries = self.num_entries + 1
-        else:
-            print("Block is full!")
-
-    def replace(self, addr, value):
-        if self.entries.has_key(addr):
-            self.entries[addr] = value
-
-
-
-
 class Cache:
     def __init__(self, associativity, size, blockSize, rep_policy):
         self.associativity = associativity
