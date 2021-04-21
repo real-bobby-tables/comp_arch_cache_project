@@ -115,6 +115,8 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     instr_len = instr_arr[1]
     instr_len_num = instr_len[1:3]
     instr_addr = instr_arr[2]
+    global CLK, miss, hits
+    CLK +=1
 
     offset = int(math.log(bSize,2))
     offset = math.ceil(offset/4)
@@ -125,9 +127,6 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     offset_char = instr_addr[-offset:]
     index_char = instr_addr[-(index+offset):-offset]
     tag_char = instr_addr[0:-(index+offset)]
-
-    
-
     for i in range(aSoc):
         if(i%3 == 0):
             val_bit = i
@@ -135,16 +134,17 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
                 cache.cache_table[index][i] = 1
                 cache.cache_table[index][i+1] = tag_char
                 cache.cache_table[index][i+2] = "data" 
+                miss = miss + 1
                 print("miss")
-                #TODO: why are the global not referenceing, replacement algorithms
+                #TODO: replacement algorithms
             elif(cache.cache_table[index][i] == 1): #miss
                 if(cache.cache_table[index][val_bit +1] != tag_char):
                     cache.cache_table[index][i+1] = tag_char
                     cache.cache_table[index][i+2] = "data" #TODO actually replace the data?
-                    #miss = miss +1
+                    miss = miss + 1
                     print("miss")
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
-                    hits + 1
+                    hits = hits + 1
                     print("hit")
     
 
@@ -201,6 +201,7 @@ miss = 0
 conflict = 0
 compuls =0
 blocks = cSizeBytes / bSize
+CLK =0
 #Cache declorations
 cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) #TODO, update to the trace or step to take in cache as an argument
 cache.create_cache()
@@ -209,3 +210,4 @@ if __name__ == '__main__':
     
     calculate_cache_values()
     simulate()
+    print("", CLK, hits, miss)
