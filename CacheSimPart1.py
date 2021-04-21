@@ -73,7 +73,7 @@ cSizeBytes = pow(2, (math.log(cSize, 2)+10))
 bSize = args.BlockSize
 aSoc = args.Associativity
 ZEROES = '00000000'
-cache = Cache(aSoc,cSize,bSize,repDict[args.Replacement]) #global cache build
+ #global cache build TODO:here?
 
 class CacheBlock:
     def __init__self(self, size):
@@ -93,7 +93,7 @@ class CacheBlock:
 
     def replace(self, addr, value):
         if self.entries.has_key(addr):
-            self.entries[addr] = val
+            self.entries[addr] = value
 
 
 
@@ -103,17 +103,20 @@ class Cache:
         self.associativity = associativity
         self.size = size
         self.blockSize = blockSize
-        self.blocks = [CacheBlock(self.blockSize) for x in range(self.associativity)]
+        #self.blocks = [CacheBlock(self.blockSize) for x in range(self.associativity)] removing this for now
         self.rep_policy = rep_policy
-        self.cache_table
+        self.cache_table = []
 
-def create_cache(self):
-    rows, cols = ((self.size/(self.blocks*self.associativity)), 3 * self.associativity) # row = size/(block*assoc)  col = valid tag data
-    self.cache_table = [[0 for i in range(cols)] for j in range(rows)]
-    for i in range(cols):
-       for j in range(rows):
-           if i%3 == 0:
-                self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
+    def create_cache(self): #needs to init to 0 in order and print
+        self.rows, self.cols = (math.floor(self.size/(self.blockSize*self.associativity)), 3 * self.associativity) # row = size/(block*assoc)  col = valid tag data
+        print("row: col:",self.rows, self.cols)
+        self.cache_table = [[0 for i in range(self.cols)] for j in range(self.rows)]
+        for i in range(self.rows):
+            print("\n") 
+            for j in range(self.cols):
+                    self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
+                    print(" ",self.cache_table[i][j],end='')
+        
     
 
 
@@ -156,7 +159,7 @@ def parse_data_line(line):
     if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
         print("No reads/writes occured")
         return None
-    print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4')
+    print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') #TODO: i think this is where the cache studd will happen. Maybe pass a function
     print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
     return None
 
@@ -174,7 +177,9 @@ def step(tr, instr_idx, data_idx):
 
 def simulate():
     print("\n\n\n***** Beginning Simulation ******")
+    cache = Cache(aSoc,cSize,bSize,repDict[args.Replacement]) #TODO, this could also be where the cache will be how to best fill this in. 
     cache.create_cache()
+    
     trace = read_trace(args.FileTrace)
     for i in range(0,len(trace),3):
         step(trace, i, i+1)
