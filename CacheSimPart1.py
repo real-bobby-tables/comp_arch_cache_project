@@ -104,16 +104,16 @@ class Cache:
         self.rep_policy = rep_policy
         self.cache_table = []
 
-    def create_cache(self): #needs to init to 0 in order and print
+    def create_cache(self): 
         self.rows, self.cols = (math.floor(self.size/(self.blockSize*self.associativity)), 3 * self.associativity) # row = size/(block*assoc)  col = valid tag data
         print("row: col:",self.rows, self.cols)
         self.cache_table = [[0 for i in range(self.cols)] for j in range(self.rows)]
         for i in range(self.rows):
-            #print("\n") 
+            
             for j in range(self.cols):
                     if j%3 == 0:
                         self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
-                   # print(" ",self.cache_table[i][j],end='')
+                   
         
     
 
@@ -157,31 +157,31 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     index_char = instr_addr[-(index+offset):-offset]
     tag_char = instr_addr[0:-(index+offset)]
 
-    #TODO convert the index_char from hex to decimal to access the cache. check valid and tag and then start the cache magic
+    
 
     for i in range(aSoc):
         if(i%3 == 0):
             val_bit = i
-            if(cache.cache_table[index][i] == 0):
+            if(cache.cache_table[index][i] == 0): #miss needs to figure out the strategy 
                 cache.cache_table[index][i] = 1
                 cache.cache_table[index][i+1] = tag_char
                 cache.cache_table[index][i+2] = "data" 
-                #miss = miss +1
-            #elif (cache.cache_table[index][val_bit] == 1 & str(cache.cache_table[index][val_bit +1]) == tag_char ):
-            elif(cache.cache_table[index][i] == 1):
+                print("miss")
+                #TODO: why are the global not referenceing, replacement algorithms
+            elif(cache.cache_table[index][i] == 1): #miss
                 if(cache.cache_table[index][val_bit +1] != tag_char):
                     cache.cache_table[index][i+1] = tag_char
-                    cache.cache_table[index][i+2] = "data" 
+                    cache.cache_table[index][i+2] = "data" #TODO actually replace the data?
                     #miss = miss +1
-                elif (cache.cache_table[index][val_bit +1] == tag_char):
+                    print("miss")
+                elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
                     hits + 1
+                    print("hit")
     
 
     print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
 
-    #print("offset ", offset_char)
-    #print("index ", index_char)
-    #print("tag ", tag_char)
+  
     return None
 
 def parse_data_line(line):
