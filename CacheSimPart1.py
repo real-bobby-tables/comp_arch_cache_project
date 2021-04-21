@@ -1,6 +1,7 @@
 import sys
 import math
 import argparse
+import random
 
 parser = argparse.ArgumentParser(description="Cache Simulator - CS 3853 Spring 2021 - Group 6")
 
@@ -110,6 +111,36 @@ def calculate_cache_values():
     print("Implementation Memory Size:\t",impSize,"KB","(",totalBytes,"bytes",")")
     print("Cost:\t\t\t\t\t\t $"+str(cost))
 
+def update_block(Replacement,index,val_bit,tag):
+     global miss, hits
+     #print(Replacement)
+     if(cache.cache_table[index][val_bit] == 0):
+        cache.cache_table[index][val_bit] = 1
+        cache.cache_table[index][val_bit+1] = tag
+        cache.cache_table[index][val_bit+2] = CLK 
+        miss = miss + 1
+     elif(cache.cache_table[index][val_bit] == 1 ):
+        if(Replacement == 'Least Recently Used'):
+            print("lru")
+            lru = cache.cache_table[index][val_bit+2] 
+            victim_index = 0
+            for i in range(aSoc):
+                if(i%3 ==0):
+                    if lru < cache.cache_table[index][i+2]:
+                        victim_index = i
+                        lru = cache.cache_table[index][i+2]
+            cache.cache_table[index][victim_index + 1] = tag
+            cache.cache_table[index][victim_index + 2] = CLK
+            miss = miss + 1
+        elif(Replacement != 'Least Recently Used'):
+            print("random")
+            random_bit = random.randint(0,aSoc)*3
+            cache.cache_table[index][random_bit + 1] = tag
+            cache.cache_table[index][random_bit + 2] = CLK
+            miss = miss + 1
+            
+
+
 def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
     instr_arr = line.split()
     instr_len = instr_arr[1]
@@ -131,24 +162,19 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
         if(i%3 == 0):
             val_bit = i
             if(cache.cache_table[index][i] == 0): #miss needs to figure out the strategy 
-                cache.cache_table[index][i] = 1
-                cache.cache_table[index][i+1] = tag_char
-                cache.cache_table[index][i+2] = "data" 
-                miss = miss + 1
-                print("miss")
+                update_block(cache.rep_policy,index,val_bit,tag_char)
+                #print("miss")
                 #TODO: replacement algorithms
             elif(cache.cache_table[index][i] == 1): #miss
                 if(cache.cache_table[index][val_bit +1] != tag_char):
-                    cache.cache_table[index][i+1] = tag_char
-                    cache.cache_table[index][i+2] = "data" #TODO actually replace the data?
-                    miss = miss + 1
-                    print("miss")
+                    update_block(cache.rep_policy,index,val_bit,tag_char)
+                    #print("miss")
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
                     hits = hits + 1
-                    print("hit")
+                    #print("hit")
     
 
-    print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
+   # print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
 
   
     return None
@@ -161,9 +187,9 @@ def parse_data_line(line):
     
 
     if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
-        print("No reads/writes occured")
+       # print("No reads/writes occured")
         return None
-    #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') #TODO: i think this is where the cache studd will happen. Maybe pass a function
+    #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') 
     #print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
     return None
 
@@ -210,4 +236,4 @@ if __name__ == '__main__':
     
     calculate_cache_values()
     simulate()
-    print("", CLK, hits, miss)
+    print("CLK hits miss", CLK, hits, miss)
