@@ -156,11 +156,21 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     index_char = instr_addr[-(index+offset):-offset]
     tag_char = instr_addr[0:-(index+offset)]
 
-    print(" " ,tag)
+    #TODO convert the index_char from hex to decimal to access the cache. check valid and tag and then start the cache magic
+
+    for i in aSoc:
+        if(cache.cache_table[index][i] == 0 and (i%3) == 0 ):
+            cache.cache_table[index][i] = 1
+            cache.cache_table[index][i+1] = tag_char
+            cache.cache_table[index][i+2] = "data" 
+    
+    
+
     print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
-    print("offset ", offset_char)
-    print("index ", index_char)
-    print("tag ", tag_char)
+
+    #print("offset ", offset_char)
+    #print("index ", index_char)
+    #print("tag ", tag_char)
     return None
 
 def parse_data_line(line):
