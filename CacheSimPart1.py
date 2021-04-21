@@ -52,11 +52,6 @@ if args.Replacement not in repDict:
 
 
 
-#check file
-#filetxt = open(args.FileTrace)
-#check CS
-#check BS
-#check RP
 
 print("Cache Simulator - CS 3853 Spring 2021 - Group XX\n")
 
@@ -67,32 +62,6 @@ print("Cache Size:\t\t\t\t\t",args.CacheSize,"KB")
 print("Block Size:\t\t\t\t\t",args.BlockSize,"bytes")
 print("Associativity Size:\t\t\t",args.Associativity)
 print("Replacement Policy:\t\t\t",repDict[args.Replacement])
-
-
-
-
-
-class CacheBlock:
-    def __init__self(self, size):
-        self.num_entries = 0
-        self.maxSize = size
-        self.entries = {}
-
-    def get_val(self, addr):
-        return self.entries[addr]
-
-    def set_val(self, addr, val):
-        if self.num_entries < self.maxSize:
-            self.entries[addr] = val
-            self.num_entries = self.num_entries + 1
-        else:
-            print("Block is full!")
-
-    def replace(self, addr, value):
-        if self.entries.has_key(addr):
-            self.entries[addr] = value
-
-
 
 
 class Cache:
