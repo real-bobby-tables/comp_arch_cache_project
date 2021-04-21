@@ -112,10 +112,10 @@ class Cache:
         print("row: col:",self.rows, self.cols)
         self.cache_table = [[0 for i in range(self.cols)] for j in range(self.rows)]
         for i in range(self.rows):
-            print("\n") 
+            #print("\n") 
             for j in range(self.cols):
                     self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
-                    print(" ",self.cache_table[i][j],end='')
+                   # print(" ",self.cache_table[i][j],end='')
         
     
 
@@ -177,7 +177,8 @@ def step(tr, instr_idx, data_idx):
 
 def simulate():
     print("\n\n\n***** Beginning Simulation ******")
-    cache = Cache(aSoc,cSize,bSize,repDict[args.Replacement]) #TODO, this could also be where the cache will be how to best fill this in. 
+    #print(" ",aSoc,cSizeB,bSize,repDict[args.Replacement])
+    cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) #TODO, update to the trace or step to take in cache as an argument
     cache.create_cache()
     
     trace = read_trace(args.FileTrace)
