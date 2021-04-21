@@ -159,10 +159,14 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     #TODO convert the index_char from hex to decimal to access the cache. check valid and tag and then start the cache magic
 
     for i in aSoc:
-        if(cache.cache_table[index][i] == 0 and (i%3) == 0 ):
+        if(i%3 == 0):
+            val_bit = i
+        if(cache.cache_table[index][i] == 0 & (i%3) == 0 ):
             cache.cache_table[index][i] = 1
             cache.cache_table[index][i+1] = tag_char
             cache.cache_table[index][i+2] = "data" 
+        elif (cache.cache_table[index][val_bit] == 1 & (cache.cache_table[index][val_bit +1]) == tag_char ):
+            #replace
     
     
 
