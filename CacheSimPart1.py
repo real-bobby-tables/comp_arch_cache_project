@@ -111,7 +111,8 @@ class Cache:
         for i in range(self.rows):
             #print("\n") 
             for j in range(self.cols):
-                    self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
+                    if j%3 == 0:
+                        self.cache_table[i][j] = 0 #set valid bits to 0 for cache read
                    # print(" ",self.cache_table[i][j],end='')
         
     
@@ -158,16 +159,22 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
 
     #TODO convert the index_char from hex to decimal to access the cache. check valid and tag and then start the cache magic
 
-    for i in aSoc:
+    for i in range(aSoc):
         if(i%3 == 0):
             val_bit = i
-        if(cache.cache_table[index][i] == 0 & (i%3) == 0 ):
-            cache.cache_table[index][i] = 1
-            cache.cache_table[index][i+1] = tag_char
-            cache.cache_table[index][i+2] = "data" 
-        elif (cache.cache_table[index][val_bit] == 1 & (cache.cache_table[index][val_bit +1]) == tag_char ):
-            #replace
-    
+            if(cache.cache_table[index][i] == 0):
+                cache.cache_table[index][i] = 1
+                cache.cache_table[index][i+1] = tag_char
+                cache.cache_table[index][i+2] = "data" 
+                #miss = miss +1
+            #elif (cache.cache_table[index][val_bit] == 1 & str(cache.cache_table[index][val_bit +1]) == tag_char ):
+            elif(cache.cache_table[index][i] == 1):
+                if(cache.cache_table[index][val_bit +1] != tag_char):
+                    cache.cache_table[index][i+1] = tag_char
+                    cache.cache_table[index][i+2] = "data" 
+                    #miss = miss +1
+                elif (cache.cache_table[index][val_bit +1] == tag_char):
+                    hits + 1
     
 
     print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
