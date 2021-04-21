@@ -52,11 +52,6 @@ if args.Replacement not in repDict:
 
 
 
-#check file
-#filetxt = open(args.FileTrace)
-#check CS
-#check BS
-#check RP
 
 print("Cache Simulator - CS 3853 Spring 2021 - Group XX\n")
 
