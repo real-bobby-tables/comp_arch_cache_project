@@ -240,22 +240,3 @@ if __name__ == '__main__':
     
     calculate_cache_values()
     simulate()
-
-
-
-
-
-'''
-print("\n***** Trace File Contents *****\n")
-i = 0
-n = 0
-for line in filetxt:
-    if n == 20:
-        break
-    if i % 3 == 0:
-        addr = line[5:7]
-        leng = line[10:18]
-        print("0x"+leng+ " ("+addr+")")
-        n += 1
-    i += 1
-#'''
