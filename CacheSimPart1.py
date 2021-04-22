@@ -111,17 +111,39 @@ def calculate_cache_values():
     print("Implementation Memory Size:\t",impSize,"KB","(",totalBytes,"bytes",")")
     print("Cost:\t\t\t\t\t\t $"+str(cost))
 
+def calculate_cpi_calues():
+    print("\n***** CACHE SIMULATION RESULTS *****\n")
+    print("Total Cache Accesses:\t\t",total)
+    print("Cache Hits:\t\t\t",hits)
+    print("Cache Misses:\t\t\t",miss)
+    print("--- Compulsory Misses:\t\t",compuls)
+    print("--- Conflict Misses:\t\t",conflict)
+    print("\n*****  CACHE HIT & MISS RATE: *****\n")
+
 def update_block(Replacement,index,val_bit,tag):
-     global miss, hits
+     global miss, hits,conflict,compuls
      #print(Replacement)
+     isnt_full =-1
+     for i in range(aSoc):
+         if(i%3 ==0):
+            if(cache.cache_table[index][i] == 0): 
+                isnt_full = i
+
      if(cache.cache_table[index][val_bit] == 0):
+
         cache.cache_table[index][val_bit] = 1
         cache.cache_table[index][val_bit+1] = tag
         cache.cache_table[index][val_bit+2] = CLK 
         miss = miss + 1
+        compuls = compuls + 1
+
+     elif(isnt_full >= 0):
+        cache.cache_table[index][isnt_full+1] = tag
+        cache.cache_table[index][isnt_full+2] = CLK  
+
      elif(cache.cache_table[index][val_bit] == 1 ):
         if(Replacement == 'Least Recently Used'):
-            print("lru")
+            #print("lru")
             lru = cache.cache_table[index][val_bit+2] 
             victim_index = 0
             for i in range(aSoc):
@@ -132,14 +154,15 @@ def update_block(Replacement,index,val_bit,tag):
             cache.cache_table[index][victim_index + 1] = tag
             cache.cache_table[index][victim_index + 2] = CLK
             miss = miss + 1
+            conflict = conflict +1
         elif(Replacement != 'Least Recently Used'):
-            print("random")
+            #print("random")
             random_bit = random.randint(0,aSoc-1)*3 
                     
             cache.cache_table[index][random_bit + 1] = tag
             cache.cache_table[index][random_bit + 2] = CLK 
             miss = miss + 1
-            
+            conflict = conflict +1
 
 
 def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
@@ -147,8 +170,9 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     instr_len = instr_arr[1]
     instr_len_num = instr_len[1:3]
     instr_addr = instr_arr[2]
-    global CLK, miss, hits
+    global CLK, miss, hits, total
     CLK +=1
+    total +=1
 
     offset = int(math.log(bSize,2))
     offset = math.ceil(offset/4)
@@ -162,17 +186,17 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     for i in range(aSoc):
         if(i%3 == 0):
             val_bit = i
-            if(cache.cache_table[index][i] == 0): #miss needs to figure out the strategy 
+            if(cache.cache_table[index][i] == 0):  
                 update_block(cache.rep_policy,index,val_bit,tag_char)
-                #print("miss")
-                #TODO: replacement algorithms
-            elif(cache.cache_table[index][i] == 1): #miss
+                
+            elif(cache.cache_table[index][i] == 1): 
+
                 if(cache.cache_table[index][val_bit +1] != tag_char):
                     update_block(cache.rep_policy,index,val_bit,tag_char)
-                    #print("miss")
+                    
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
                     hits = hits + 1
-                    #print("hit")
+                    
     
 
    # print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
@@ -237,4 +261,5 @@ if __name__ == '__main__':
     
     calculate_cache_values()
     simulate()
+    calculate_cpi_calues()
     print("CLK hits miss", CLK, hits, miss)
