@@ -112,13 +112,39 @@ def calculate_cache_values():
     print("Cost:\t\t\t\t\t\t $"+str(cost))
 
 def calculate_cpi_calues():
+
+    hit_rate = (hits * 100)/total
+    miss_rate = 1 - hit_rate
+    blocks = cSizeBytes / bSize
+    indB = math.log(cSizeBytes / (bSize * aSoc), 2)
+    tagB = dataBus - indB - math.log(bSize, 2)
+    overhead = (blocks * 1 + blocks * tagB) / 8
+    impSize = (cSizeBytes + overhead) / 1024
+    impSizeRU = math.ceil((cSizeBytes + overhead) / 1024)
+    cost = round(impSizeRU * 0.09, 2)
+    unused_blocks = ((blocks - compuls)* (bSize + overhead))/1024
+    waste = cost * unused_blocks #kb?
+    #CPI = Number Cycles/Number Instruction needs to get count
+
+  
     print("\n***** CACHE SIMULATION RESULTS *****\n")
     print("Total Cache Accesses:\t\t",total)
     print("Cache Hits:\t\t\t",hits)
     print("Cache Misses:\t\t\t",miss)
     print("--- Compulsory Misses:\t\t",compuls)
     print("--- Conflict Misses:\t\t",conflict)
+
     print("\n*****  CACHE HIT & MISS RATE: *****\n")
+
+    print("Hit Rate:\t",hit_rate) #// (Hits * 100) / Total Accesses
+    print("Miss Rate:\t",miss_rate)   #1 – Hit Rate           
+    print("CPI:14.14 Cycles/Instruction  (7)")  #// Number Cycles/Number Instructions 
+    # // Unused KB = ( (TotalBlocks-Compulsory Misses) * (BlockSize+OverheadSize) ) / 1024
+    #// The 1024 KB below is the total cache size for this example
+    #// Waste = COST/KB * Unused KB               
+    print("Unused Cache Space:\t",(blocks - compuls),"Kb","/",(bSize+overhead) ,"Kb" ,"=", unused_blocks, "Waste: $", waste)
+    print("Unused Cache Blocks:", unused_blocks, "/",blocks)  
+
 
 def update_block(Replacement,index,val_bit,tag):
      global miss, hits,conflict,compuls
@@ -262,4 +288,4 @@ if __name__ == '__main__':
     calculate_cache_values()
     simulate()
     calculate_cpi_calues()
-    print("CLK hits miss", CLK, hits, miss)
+    
