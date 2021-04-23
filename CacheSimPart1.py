@@ -136,14 +136,14 @@ def calculate_cpi_calues():
 
     print("\n*****  CACHE HIT & MISS RATE: *****\n")
 
-    print("Hit Rate:\t",hit_rate) #// (Hits * 100) / Total Accesses
-    print("Miss Rate:\t",miss_rate)   #1 – Hit Rate           
+    print("Hit Rate:\t\t\t",hit_rate) #// (Hits * 100) / Total Accesses
+    print("Miss Rate:\t\t\t",miss_rate)   #1 – Hit Rate           
     print("CPI:14.14 Cycles/Instruction  (7)")  #// Number Cycles/Number Instructions 
     # // Unused KB = ( (TotalBlocks-Compulsory Misses) * (BlockSize+OverheadSize) ) / 1024
     #// The 1024 KB below is the total cache size for this example
     #// Waste = COST/KB * Unused KB               
     print("Unused Cache Space:\t",(blocks - compuls),"Kb","/",(bSize+overhead) ,"Kb" ,"=", unused_blocks, "Waste: $", waste)
-    print("Unused Cache Blocks:", unused_blocks, "/",blocks)  
+    print("Unused Cache Blocks:\t", unused_blocks, "/",blocks)  
 
 
 def update_block(Replacement,index,val_bit,tag):
@@ -280,11 +280,12 @@ compuls =0
 blocks = cSizeBytes / bSize
 CLK =0
 #Cache declorations
-cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) #TODO, update to the trace or step to take in cache as an argument
-cache.create_cache()
+cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) 
+
+
 
 if __name__ == '__main__':
-    
+    cache.create_cache()
     calculate_cache_values()
     simulate()
     calculate_cpi_calues()
