@@ -122,9 +122,9 @@ def calculate_cpi_calues():
     impSize = (cSizeBytes + overhead) / 1024
     impSizeRU = math.ceil((cSizeBytes + overhead) / 1024)
     cost = round(impSizeRU * 0.09, 2)
-    unused_blocks = ((blocks - compuls)* impSize)/1024
-    waste = cost * unused_blocks #kb?
-    #CPI = Number Cycles/Number Instruction needs to get count
+    unused_blocks = (impSize*1024 - (compuls*bSize))/1024
+    waste =  round(unused_blocks * 0.09, 2)
+    
 
   
     print("\n***** CACHE SIMULATION RESULTS *****\n")
@@ -138,12 +138,9 @@ def calculate_cpi_calues():
 
     print("Hit Rate:\t\t\t",round(hit_rate,2),"%") #// (Hits * 100) / Total Accesses
     print("Miss Rate:\t\t\t",round(miss_rate,2),"%")   #100 – Hit Rate           
-    print("CPI:\t\t\t\t", num_cycles/num_instruct,"Cycles/Instruction   (",num_instruct,")")  #// Number Cycles/Number Instructions 
-   
-    #// The 1024 KB below is the total cache size for this example
-    #// Waste = COST/KB * Unused KB               
-    print("Unused Cache Space:\t\t",unused_blocks,"Kb","/",impSize,"Kb" ,"=", unused_blocks, "Waste: $", waste)
-    print("Unused Cache Blocks:\t\t", unused_blocks, "/",blocks)  
+    print("CPI:\t\t\t\t", num_cycles/num_instruct,"Cycles/Instruction   (",num_instruct,")")  #// Number Cycles/Number Instructions               
+    print("Unused Cache Space:\t\t",round(unused_blocks,2),"Kb","/",impSize,"Kb" ,"=", round((unused_blocks/impSize*100),2),"% Waste: $", waste)
+    print("Unused Cache Blocks:\t\t", blocks - compuls, "/",blocks)  
 
 
 def update_block(Replacement,index,val_bit,tag):
