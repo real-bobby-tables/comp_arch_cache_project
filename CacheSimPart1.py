@@ -113,7 +113,7 @@ def calculate_cache_values():
 
 def calculate_cpi_calues():
 
-    hit_rate = ((hits+1) * 100)/(total+1)
+    hit_rate = ((hits) * 100)/(total)
     miss_rate = 100 - hit_rate
     blocks = cSizeBytes / bSize
     indB = math.log(cSizeBytes / (bSize * aSoc), 2)
@@ -136,9 +136,9 @@ def calculate_cpi_calues():
 
     print("\n*****  CACHE HIT & MISS RATE: *****\n")
 
-    print("Hit Rate:\t\t\t",round(hit_rate,2),"%") #// (Hits * 100) / Total Accesses
-    print("Miss Rate:\t\t\t",round(miss_rate,2),"%")   #100 – Hit Rate           
-    print("CPI:\t\t\t\t", num_cycles/num_instruct,"Cycles/Instruction   (",num_instruct,")")  #// Number Cycles/Number Instructions               
+    print("Hit Rate:\t\t\t",round(hit_rate,2),"%") 
+    print("Miss Rate:\t\t\t",round(miss_rate,2),"%")             
+    print("CPI:\t\t\t\t", num_cycles/num_instruct,"Cycles/Instruction   (",num_instruct,")")                
     print("Unused Cache Space:\t\t",round(unused_blocks,2),"Kb","/",impSize,"Kb" ,"=", round((unused_blocks/impSize*100),2),"% Waste: $", waste)
     print("Unused Cache Blocks:\t\t", blocks - compuls, "/",blocks)  
 
@@ -242,7 +242,7 @@ def cache_parse(line):
                     num_cycles +=1
                     return None
 
-def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
+def parse_instruction_line(line):  #what to do with the wrap around inst_len
     global num_cycles,num_instruct
     instr_arr = line.split()
     instr_len = instr_arr[1]
