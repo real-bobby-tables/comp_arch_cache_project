@@ -142,16 +142,18 @@ def calculate_cpi_calues():
     # // Unused KB = ( (TotalBlocks-Compulsory Misses) * (BlockSize+OverheadSize) ) / 1024
     #// The 1024 KB below is the total cache size for this example
     #// Waste = COST/KB * Unused KB               
-    print("Unused Cache Space:\t",(blocks - compuls),"Kb","/",(bSize+overhead) ,"Kb" ,"=", unused_blocks, "Waste: $", waste)
-    print("Unused Cache Blocks:\t", unused_blocks, "/",blocks)  
+    print("Unused Cache Space:\t\t",(blocks - compuls),"Kb","/",(bSize+overhead) ,"Kb" ,"=", unused_blocks, "Waste: $", waste)
+    print("Unused Cache Blocks:\t\t", unused_blocks, "/",blocks)  
 
 
 def update_block(Replacement,index,val_bit,tag):
      global miss, hits,conflict,compuls
      #print(Replacement)
      isnt_full =-1
-     for i in range(aSoc):
-         if(i%3 ==0):
+     for i in range(cache.cols):
+         #so its just going through the range like 1 =0 3 = 3 and not the array index
+         if(i%3 == 0):
+            
             if(cache.cache_table[index][i] == 0): 
                 isnt_full = i
 
@@ -161,18 +163,21 @@ def update_block(Replacement,index,val_bit,tag):
         cache.cache_table[index][val_bit+1] = tag
         cache.cache_table[index][val_bit+2] = CLK 
         miss = miss + 1
-        compuls = compuls + 1
+        compuls += 1
 
      elif(isnt_full >= 0):
+        
         cache.cache_table[index][isnt_full+1] = tag
         cache.cache_table[index][isnt_full+2] = CLK  
+        miss = miss + 1
+        compuls += 1
 
      elif(cache.cache_table[index][val_bit] == 1 ):
         if(Replacement == 'Least Recently Used'):
             #print("lru")
             lru = cache.cache_table[index][val_bit+2] 
             victim_index = 0
-            for i in range(aSoc):
+            for i in range(cache.cols):
                 if(i%3 ==0):
                     if lru < cache.cache_table[index][i+2]:
                         victim_index = i
@@ -190,26 +195,25 @@ def update_block(Replacement,index,val_bit,tag):
             miss = miss + 1
             conflict = conflict +1
 
-
-def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
-    instr_arr = line.split()
-    instr_len = instr_arr[1]
-    instr_len_num = instr_len[1:3]
-    instr_addr = instr_arr[2]
+def cache_parse(line):
     global CLK, miss, hits, total
     CLK +=1
     total +=1
 
-    offset = int(math.log(bSize,2))
+    offset = int(math.log(bSize,2)) 
     offset = math.ceil(offset/4)
 
     index =  int(math.log(cSizeBytes / (bSize * aSoc), 2))
-    index =  math.ceil(math.log(cSizeBytes / (bSize * aSoc), 2)/4)
+    index = math.floor(index/4) #TODO: check this but it works
+    
    
-    offset_char = instr_addr[-offset:]
-    index_char = instr_addr[-(index+offset):-offset]
-    tag_char = instr_addr[0:-(index+offset)]
-    for i in range(aSoc):
+    offset_char = line[-offset:]
+    index_char = line[-(index+offset):-offset]
+    tag_char = line[0:-(index+offset)]
+
+    index = int(index_char,16)
+    
+    for i in range(cache.cols):
         if(i%3 == 0):
             val_bit = i
             if(cache.cache_table[index][i] == 0):  
@@ -222,10 +226,18 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
                     
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
                     hits = hits + 1
+
+def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
+    instr_arr = line.split()
+    instr_len = instr_arr[1]
+    instr_len_num = instr_len[1:3]
+    instr_addr = instr_arr[2]
+
+    cache_parse(instr_addr)
                     
     
 
-   # print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
+    #print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
 
   
     return None
@@ -236,9 +248,18 @@ def parse_data_line(line):
     dst_tup = (data_arr[4], data_arr[5])
 
     
-
     if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
        # print("No reads/writes occured")
+        return None
+    elif (src_tup[0] != ZEROES and dst_tup[0] != ZEROES):
+        cache_parse(src_tup[0])
+        cache_parse(dst_tup[0])
+        return None
+    elif (src_tup[0] != ZEROES and dst_tup[0] == ZEROES):
+        cache_parse(src_tup[0])
+        return None
+    elif (src_tup[0] == ZEROES and dst_tup[0] != ZEROES):
+        cache_parse(dst_tup[0])
         return None
     #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') 
     #print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
