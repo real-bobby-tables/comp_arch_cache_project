@@ -138,7 +138,7 @@ def calculate_cpi_calues():
 
     print("Hit Rate:\t\t\t",hit_rate) #// (Hits * 100) / Total Accesses
     print("Miss Rate:\t\t\t",miss_rate)   #1 – Hit Rate           
-    print("CPI:14.14 Cycles/Instruction  (7)")  #// Number Cycles/Number Instructions 
+    print("CPI:14.14 Cycles/Instruction  (7)", num_cycles)  #// Number Cycles/Number Instructions 
     # // Unused KB = ( (TotalBlocks-Compulsory Misses) * (BlockSize+OverheadSize) ) / 1024
     #// The 1024 KB below is the total cache size for this example
     #// Waste = COST/KB * Unused KB               
@@ -147,7 +147,7 @@ def calculate_cpi_calues():
 
 
 def update_block(Replacement,index,val_bit,tag):
-     global miss, hits,conflict,compuls
+     global miss, hits,conflict,compuls,num_cycles
      #print(Replacement)
      isnt_full =-1
      for i in range(cache.cols):
@@ -162,15 +162,19 @@ def update_block(Replacement,index,val_bit,tag):
         cache.cache_table[index][val_bit] = 1
         cache.cache_table[index][val_bit+1] = tag
         cache.cache_table[index][val_bit+2] = CLK 
+        print("miss 165")
         miss = miss + 1
         compuls += 1
+        return None
 
      elif(isnt_full >= 0):
         
         cache.cache_table[index][isnt_full+1] = tag
         cache.cache_table[index][isnt_full+2] = CLK  
+        print("miss 174")
         miss = miss + 1
         compuls += 1
+        return None
 
      elif(cache.cache_table[index][val_bit] == 1 ):
         if(Replacement == 'Least Recently Used'):
@@ -185,7 +189,10 @@ def update_block(Replacement,index,val_bit,tag):
             cache.cache_table[index][victim_index + 1] = tag
             cache.cache_table[index][victim_index + 2] = CLK
             miss = miss + 1
+            print("miss 192")
             conflict = conflict +1
+            return None
+
         elif(Replacement != 'Least Recently Used'):
             #print("random")
             random_bit = random.randint(0,aSoc-1)*3 
@@ -194,9 +201,12 @@ def update_block(Replacement,index,val_bit,tag):
             cache.cache_table[index][random_bit + 2] = CLK 
             miss = miss + 1
             conflict = conflict +1
+            return None
 
 def cache_parse(line):
-    global CLK, miss, hits, total
+
+    global CLK, miss, hits, total,num_cycles
+
     CLK +=1
     total +=1
 
@@ -218,21 +228,28 @@ def cache_parse(line):
             val_bit = i
             if(cache.cache_table[index][i] == 0):  
                 update_block(cache.rep_policy,index,val_bit,tag_char)
+                return None
                 
             elif(cache.cache_table[index][i] == 1): 
 
                 if(cache.cache_table[index][val_bit +1] != tag_char):
                     update_block(cache.rep_policy,index,val_bit,tag_char)
-                    
+                    return None
+
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
+                    
                     hits = hits + 1
+                    num_cycles +=1
+                    return None
 
 def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
+    global num_cycles
     instr_arr = line.split()
     instr_len = instr_arr[1]
     instr_len_num = instr_len[1:3]
     instr_addr = instr_arr[2]
 
+    num_cycles +=2
     cache_parse(instr_addr)
                     
     
@@ -243,24 +260,30 @@ def parse_instruction_line(line): #so the data parsing happens here but there se
     return None
 
 def parse_data_line(line):
+    global num_cycles
     data_arr = line.split()
     src_tup = (data_arr[1], data_arr[2])
     dst_tup = (data_arr[4], data_arr[5])
 
     
     if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
-       # print("No reads/writes occured")
+        
         return None
-    elif (src_tup[0] != ZEROES and dst_tup[0] != ZEROES):
-        cache_parse(src_tup[0])
-        cache_parse(dst_tup[0])
-        return None
+        
+    elif(src_tup[0] != ZEROES and dst_tup[0] != ZEROES):
+        
+        cache_parse(data_arr[1])
+        cache_parse(data_arr[5])
+        num_cycles +=2
+        
     elif (src_tup[0] != ZEROES and dst_tup[0] == ZEROES):
-        cache_parse(src_tup[0])
-        return None
+        cache_parse(data_arr[1])
+        num_cycles +=1
+        
     elif (src_tup[0] == ZEROES and dst_tup[0] != ZEROES):
-        cache_parse(dst_tup[0])
-        return None
+        cache_parse(data_arr[5])
+        num_cycles +=1
+        
     #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') 
     #print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
     return None
@@ -300,6 +323,7 @@ conflict = 0
 compuls =0
 blocks = cSizeBytes / bSize
 CLK =0
+num_cycles =0
 #Cache declorations
 cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) 
 
