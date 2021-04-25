@@ -272,8 +272,7 @@ def parse_instruction_line(line):  #what to do with the wrap around inst_len
     instr_addr = instr_arr[2]
 
     instr_len = instr_len[1:-2]
-    print(instr_len)
-
+    
     num_cycles +=2
     num_instruct +=1
     cache_parse(instr_addr,instr_len)
