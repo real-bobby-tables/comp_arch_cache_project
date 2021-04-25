@@ -203,15 +203,16 @@ def update_block(Replacement,index,val_bit,tag):
             num_cycles += 4 *num_reads
             return None
 
-def cache_parse(line):
+def cache_parse(line,len):
 
     global CLK, miss, hits, total,num_cycles
 
     CLK +=1
-    total +=1
+    
 
     offset = int(math.log(bSize,2)) 
-    offset = math.ceil(offset/4)
+    offset = math.floor(offset/4)
+
 
     index =  int(math.log(cSizeBytes / (bSize * aSoc), 2))
     index = math.floor(index/4) #TODO: check this but it works
@@ -221,25 +222,46 @@ def cache_parse(line):
     index_char = line[-(index+offset):-offset]
     tag_char = line[0:-(index+offset)]
 
+    offset = int(offset_char,16)
+    address = int(line,16)
+   
+    reads =1
+    access =1
+    if(len != -1):
+        reads = int(len) + offset
+        reads -= bSize
+        while(reads >=0):
+            reads -= bSize
+            access +=1
+            
+
+            
+ 
+
     index = int(index_char,16)
     
     for i in range(cache.cols):
         if(i%3 == 0):
             val_bit = i
-            if(cache.cache_table[index][i] == 0):  
-                update_block(cache.rep_policy,index,val_bit,tag_char)
+            if(cache.cache_table[index][i] == 0):  #miss
+                for i in range(access):
+                    total +=1
+                    update_block(cache.rep_policy,index,val_bit,tag_char)
                 return None
                 
-            elif(cache.cache_table[index][i] == 1): 
+            elif(cache.cache_table[index][i] == 1): #miss
 
                 if(cache.cache_table[index][val_bit +1] != tag_char):
-                    update_block(cache.rep_policy,index,val_bit,tag_char)
+                    for i in range(access):
+                        total +=1
+                        update_block(cache.rep_policy,index,val_bit,tag_char)
                     return None
 
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
-                    
-                    hits = hits + 1
-                    num_cycles +=1
+                    for i in range(access):
+                        total +=1
+                        hits = hits + 1
+                        num_cycles +=1
                     return None
 
 def parse_instruction_line(line):  #what to do with the wrap around inst_len
@@ -249,9 +271,12 @@ def parse_instruction_line(line):  #what to do with the wrap around inst_len
     instr_len_num = instr_len[1:3]
     instr_addr = instr_arr[2]
 
+    instr_len = instr_len[1:-2]
+    print(instr_len)
+
     num_cycles +=2
     num_instruct +=1
-    cache_parse(instr_addr)
+    cache_parse(instr_addr,instr_len)
                     
     
 
@@ -273,16 +298,16 @@ def parse_data_line(line):
         
     elif(src_tup[0] != ZEROES and dst_tup[0] != ZEROES):
         
-        cache_parse(data_arr[1])
-        cache_parse(data_arr[5])
+        cache_parse(data_arr[1],-1)
+        cache_parse(data_arr[5],-1)
         num_cycles +=2
         
     elif (src_tup[0] != ZEROES and dst_tup[0] == ZEROES):
-        cache_parse(data_arr[1])
+        cache_parse(data_arr[1],-1)
         num_cycles +=1
         
     elif (src_tup[0] == ZEROES and dst_tup[0] != ZEROES):
-        cache_parse(data_arr[5])
+        cache_parse(data_arr[5],-1)
         num_cycles +=1
         
     #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') 
