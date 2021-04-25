@@ -289,24 +289,27 @@ def parse_data_line(line):
     data_arr = line.split()
     src_tup = (data_arr[1], data_arr[2])
     dst_tup = (data_arr[4], data_arr[5])
-
-    
     if (src_tup[0] == ZEROES and dst_tup[0] == ZEROES):
-        
         return None
         
     elif(src_tup[0] != ZEROES and dst_tup[0] != ZEROES):
         
-        cache_parse(data_arr[1],-1)
-        cache_parse(data_arr[5],-1)
+        cache_parse(src_tup[0],-1)
+        if dst_tup[1] == '--------':
+            cache_parse(dst_tup[0],-1)
+        else:
+            cache_parse(dst_tup[1], -1)
         num_cycles +=2
         
     elif (src_tup[0] != ZEROES and dst_tup[0] == ZEROES):
-        cache_parse(data_arr[1],-1)
+        cache_parse(src_tup[0],-1)
         num_cycles +=1
         
     elif (src_tup[0] == ZEROES and dst_tup[0] != ZEROES):
-        cache_parse(data_arr[5],-1)
+        if dst_tup[1] == "--------":
+            cache_parse(dst_tup[0],-1)
+        else:
+            cache_parse(dst_tup[1], -1)
         num_cycles +=1
         
     #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') 
