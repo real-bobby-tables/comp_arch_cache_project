@@ -113,8 +113,8 @@ def calculate_cache_values():
 
 def calculate_cpi_calues():
 
-    hit_rate = (hits * 100)/total
-    miss_rate = 1 - hit_rate
+    hit_rate = ((hits+1) * 100)/(total+1)
+    miss_rate = 100 - hit_rate
     blocks = cSizeBytes / bSize
     indB = math.log(cSizeBytes / (bSize * aSoc), 2)
     tagB = dataBus - indB - math.log(bSize, 2)
@@ -122,7 +122,7 @@ def calculate_cpi_calues():
     impSize = (cSizeBytes + overhead) / 1024
     impSizeRU = math.ceil((cSizeBytes + overhead) / 1024)
     cost = round(impSizeRU * 0.09, 2)
-    unused_blocks = ((blocks - compuls)* (bSize + overhead))/1024
+    unused_blocks = ((blocks - compuls)* impSize)/1024
     waste = cost * unused_blocks #kb?
     #CPI = Number Cycles/Number Instruction needs to get count
 
@@ -136,13 +136,13 @@ def calculate_cpi_calues():
 
     print("\n*****  CACHE HIT & MISS RATE: *****\n")
 
-    print("Hit Rate:\t\t\t",hit_rate) #// (Hits * 100) / Total Accesses
-    print("Miss Rate:\t\t\t",miss_rate)   #1 – Hit Rate           
-    print("CPI:14.14 Cycles/Instruction  (7)", num_cycles)  #// Number Cycles/Number Instructions 
-    # // Unused KB = ( (TotalBlocks-Compulsory Misses) * (BlockSize+OverheadSize) ) / 1024
+    print("Hit Rate:\t\t\t",round(hit_rate,2),"%") #// (Hits * 100) / Total Accesses
+    print("Miss Rate:\t\t\t",round(miss_rate,2),"%")   #100 – Hit Rate           
+    print("CPI:\t\t\t\t", num_cycles/num_instruct,"Cycles/Instruction   (",num_instruct,")")  #// Number Cycles/Number Instructions 
+   
     #// The 1024 KB below is the total cache size for this example
     #// Waste = COST/KB * Unused KB               
-    print("Unused Cache Space:\t\t",(blocks - compuls),"Kb","/",(bSize+overhead) ,"Kb" ,"=", unused_blocks, "Waste: $", waste)
+    print("Unused Cache Space:\t\t",unused_blocks,"Kb","/",impSize,"Kb" ,"=", unused_blocks, "Waste: $", waste)
     print("Unused Cache Blocks:\t\t", unused_blocks, "/",blocks)  
 
 
@@ -162,17 +162,18 @@ def update_block(Replacement,index,val_bit,tag):
         cache.cache_table[index][val_bit] = 1
         cache.cache_table[index][val_bit+1] = tag
         cache.cache_table[index][val_bit+2] = CLK 
-        print("miss 165")
-        miss = miss + 1
+        miss += 1
         compuls += 1
+        num_cycles += 4 *num_reads
         return None
 
      elif(isnt_full >= 0):
         
         cache.cache_table[index][isnt_full+1] = tag
         cache.cache_table[index][isnt_full+2] = CLK  
-        print("miss 174")
-        miss = miss + 1
+        
+        num_cycles += 4 *num_reads
+        miss += 1
         compuls += 1
         return None
 
@@ -188,8 +189,9 @@ def update_block(Replacement,index,val_bit,tag):
                         lru = cache.cache_table[index][i+2]
             cache.cache_table[index][victim_index + 1] = tag
             cache.cache_table[index][victim_index + 2] = CLK
-            miss = miss + 1
-            print("miss 192")
+            miss += 1
+            num_cycles += 4 *num_reads
+           
             conflict = conflict +1
             return None
 
@@ -199,8 +201,9 @@ def update_block(Replacement,index,val_bit,tag):
                     
             cache.cache_table[index][random_bit + 1] = tag
             cache.cache_table[index][random_bit + 2] = CLK 
-            miss = miss + 1
-            conflict = conflict +1
+            miss +=1
+            conflict +=1
+            num_cycles += 4 *num_reads
             return None
 
 def cache_parse(line):
@@ -243,13 +246,14 @@ def cache_parse(line):
                     return None
 
 def parse_instruction_line(line): #so the data parsing happens here but there seperate, how to update cache
-    global num_cycles
+    global num_cycles,num_instruct
     instr_arr = line.split()
     instr_len = instr_arr[1]
     instr_len_num = instr_len[1:3]
     instr_addr = instr_arr[2]
 
     num_cycles +=2
+    num_instruct +=1
     cache_parse(instr_addr)
                     
     
@@ -324,6 +328,8 @@ compuls =0
 blocks = cSizeBytes / bSize
 CLK =0
 num_cycles =0
+num_reads = bSize/4
+num_instruct =0
 #Cache declorations
 cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) 
 
