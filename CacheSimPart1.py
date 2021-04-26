@@ -38,7 +38,7 @@ parser.add_argument('-r', '--Replacement',
     metavar='Replacement policy',
     type=str,
     help="The replacement policy of this cache",
-    required=True) # RR, RND, or LRU
+    required=True) #RND, or LRU
 
 
 args = parser.parse_args()
@@ -135,8 +135,8 @@ def calculate_cpi_calues():
     print("Hit Rate:\t\t\t",round(hit_rate,2),"%") 
     print("Miss Rate:\t\t\t",round(miss_rate,2),"%")             
     print("CPI:\t\t\t\t", num_cycles/num_instruct,"Cycles/Instruction   (",num_instruct,")")                
-    print("Unused Cache Space:\t\t",round(unused_blocks,2),"Kb","/",impSize,"Kb" ,"=", round((unused_blocks/impSize*100),2),"% Waste: $", waste)
-    print("Unused Cache Blocks:\t\t", blocks - compuls, "/",blocks)  
+    print("Unused Cache Space:\t\t",abs(round(unused_blocks,2)),"Kb","/",impSize,"Kb" ,"=", abs(round((unused_blocks/impSize*100),2)),"% Waste: $", abs(waste))
+    print("Unused Cache Blocks:\t\t", abs(blocks - compuls), "/",blocks)  
 
 
 def update_block(Replacement,index,val_bit,tag):
