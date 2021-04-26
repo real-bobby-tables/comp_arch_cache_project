@@ -44,19 +44,12 @@ parser.add_argument('-r', '--Replacement',
 args = parser.parse_args()
 
 
-repDict = {'RR':"Round Robin", 'RND':"Random", 'LRU':"Least Recently Used"}
+repDict = {'RND':"Random", 'LRU':"Least Recently Used"}
 dataBus = 32
 
 if args.Replacement not in repDict:
     print("Bad replacement, please use either RND, or LRU")
     exit(1)
-
-if args.Replacement == 'RR':
-    print("RR not suported, please use either RND, or LRU")
-    exit(1)
-
-
-
 
 print("Cache Simulator - CS 3853 Spring 2021 - Group 06\n")
 
@@ -148,7 +141,6 @@ def calculate_cpi_calues():
 
 def update_block(Replacement,index,val_bit,tag):
      global miss, hits,conflict,compuls,num_cycles
-     #print(Replacement)
      isnt_full =-1
      for i in range(cache.cols):
          #so its just going through the range like 1 =0 3 = 3 and not the array index
@@ -280,12 +272,6 @@ def parse_instruction_line(line):  #what to do with the wrap around inst_len
     num_cycles +=2
     num_instruct +=1
     cache_parse(instr_addr,instr_len)
-                    
-    
-
-    #print(f'Address: 0x{instr_addr}, length = {instr_len_num}')
-
-  
     return None
 
 def parse_data_line(line):
@@ -315,9 +301,6 @@ def parse_data_line(line):
         else:
             cache_parse(dst_tup[1], -1)
         num_cycles +=1
-        
-    #print(f'Data read at 0x{src_tup[0]}{src_tup[1]}, length=4') 
-    #print(f'Data write at 0x{dst_tup[0]}{dst_tup[1]}, length=4')
     return None
 
 def read_trace(tr):
