@@ -224,7 +224,7 @@ def cache_parse(line,len):
     index_char = line[-(index+offset):-offset]
     tag_char = line[0:-(index+offset)]
 
-    print(tag_char)
+    
     offset = int(offset_char,16)
     address = int(line,16)
    
