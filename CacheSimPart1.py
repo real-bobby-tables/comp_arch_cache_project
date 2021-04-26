@@ -48,13 +48,17 @@ repDict = {'RR':"Round Robin", 'RND':"Random", 'LRU':"Least Recently Used"}
 dataBus = 32
 
 if args.Replacement not in repDict:
-    print("Bad replacement, please use either RR, RND, or LRU")
+    print("Bad replacement, please use either RND, or LRU")
+    exit(1)
+
+if args.Replacement == 'RR':
+    print("RR not suported, please use either RND, or LRU")
     exit(1)
 
 
 
 
-print("Cache Simulator - CS 3853 Spring 2021 - Group XX\n")
+print("Cache Simulator - CS 3853 Spring 2021 - Group 06\n")
 
 print("Trace File: ", args.FileTrace,"\n")
 
@@ -70,7 +74,6 @@ class Cache:
         self.associativity = associativity
         self.size = size
         self.blockSize = blockSize
-        #self.blocks = [CacheBlock(self.blockSize) for x in range(self.associativity)] removing this for now
         self.rep_policy = rep_policy
         self.cache_table = []
 
@@ -128,7 +131,7 @@ def calculate_cpi_calues():
 
   
     print("\n***** CACHE SIMULATION RESULTS *****\n")
-    print("Total Cache Accesses:\t\t",total)
+    print("Total Cache Accesses:\t\t",total,"(",num_address,"addresses)")
     print("Cache Hits:\t\t\t",hits)
     print("Cache Misses:\t\t\t",miss)
     print("--- Compulsory Misses:\t\t",compuls)
@@ -188,7 +191,6 @@ def update_block(Replacement,index,val_bit,tag):
             cache.cache_table[index][victim_index + 2] = CLK
             miss += 1
             num_cycles += 4 *num_reads
-           
             conflict = conflict +1
             return None
 
@@ -205,9 +207,9 @@ def update_block(Replacement,index,val_bit,tag):
 
 def cache_parse(line,len):
 
-    global CLK, miss, hits, total,num_cycles
+    global CLK, miss, hits, total,num_cycles,num_address
 
-    CLK +=1
+    
     
 
     offset = int(math.log(bSize,2)) 
@@ -222,6 +224,7 @@ def cache_parse(line,len):
     index_char = line[-(index+offset):-offset]
     tag_char = line[0:-(index+offset)]
 
+    print(tag_char)
     offset = int(offset_char,16)
     address = int(line,16)
    
@@ -229,14 +232,12 @@ def cache_parse(line,len):
     access =1
     if(len != -1):
         reads = int(len) + offset
+        num_address +=1
         reads -= bSize
         while(reads >=0):
             reads -= bSize
             access +=1
             
-
-            
- 
 
     index = int(index_char,16)
     
@@ -246,6 +247,7 @@ def cache_parse(line,len):
             if(cache.cache_table[index][i] == 0):  #miss
                 for i in range(access):
                     total +=1
+                    CLK +=1
                     update_block(cache.rep_policy,index,val_bit,tag_char)
                 return None
                 
@@ -254,11 +256,13 @@ def cache_parse(line,len):
                 if(cache.cache_table[index][val_bit +1] != tag_char):
                     for i in range(access):
                         total +=1
+                        CLK +=1
                         update_block(cache.rep_policy,index,val_bit,tag_char)
                     return None
 
                 elif (cache.cache_table[index][val_bit +1] == tag_char): #hits
                     for i in range(access):
+                        CLK +=1
                         total +=1
                         hits = hits + 1
                         num_cycles +=1
@@ -353,6 +357,7 @@ blocks = cSizeBytes / bSize
 CLK =0
 num_cycles =0
 num_reads = bSize/4
+num_address =0
 num_instruct =0
 #Cache declorations
 cache = Cache(aSoc,cSizeBytes,bSize,repDict[args.Replacement]) 
